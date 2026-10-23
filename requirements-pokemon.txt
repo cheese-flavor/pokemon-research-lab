@@ -1,0 +1,3 @@
+# Current Pokemon data translation dependencies; API model is configured in code.
+openai==2.54.0
+python-dotenv==1.2.3

@@ -1,0 +1,53 @@
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
+
+# Private specifications and PDF documents (all directories, any letter case)
+*.[pP][dD][fF]
+# Local specifications, task assignments, prompts, and handoff notes
+/private/
+.env.*
+!.env.example
+*credentials*.json
+*service-account*.json
+
+# Data stays local on every remote, including GitLab.
+data/
+dataset/
+datasets/
+raw/
+downloads/
+cache/
+.cache/
+chroma/
+.chroma/
+chroma_db/
+vectorstore/
+vector_store/
+embeddings/
+# Downloaded or generated data outside the standard directories
+*.csv
+*.tsv
+*.parquet
+*.arrow
+*.jsonl
+*.ndjson
+*.sqlite
+*.sqlite3
+*.db
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.joblib
+/outputs/pokemon/
+/outputs/f406/holdout_predictions.csv
+
+# Private assessment workbooks (all directories, case-insensitive extensions)
+*.[xX][lL][sS]
+*.[xX][lL][sS][xX]
+*.[xX][lL][sS][mM]

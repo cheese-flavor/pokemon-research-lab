@@ -1,0 +1,33 @@
+[gms]
+base_url = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/"
+answer_model = "gpt-6.1-sol"
+embedding_model = "text-embedding-3-small"
+embedding_dimensions = 1536
+batch_size = 32
+
+[metadata]
+collection = "pokemon_meta_v1"
+expected_count = 1025
+schema_version = "pokemon-meta-v1"
+items_path = "dataset/pokemon/items.json"
+store_path = "dataset/pokemon/vectorstore"
+cache_path = "dataset/pokemon/embeddings"
+manifest_path = "dataset/pokemon/indexing/metadata_manifest.json"
+
+[documents]
+collection = "pokemon_docs_v1"
+corpus_path = "dataset/pokemon/documents_ko_enriched.json"
+chunk_size_chars = 800
+chunk_overlap_chars = 100
+candidate_limit = 30
+related_limit = 8
+schema_version = "pokemon-docs-v1"
+cache_path = "dataset/pokemon/ingestion/cache"
+manifest_path = "dataset/pokemon/ingestion/manifest.json"
+
+[retrieval]
+document_fetch_k = 30
+max_fetch_k = 200
+document_top_k = 5
+context_budget_tokens = 6000
+answer_cache_path = "dataset/pokemon/rag/cache"
