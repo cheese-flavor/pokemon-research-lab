@@ -17,3 +17,5 @@ python scripts/export_pokemon_public.py --destination outputs/pokemon/public-rel
 GitLab의 이전 주소는 서버가 안내한 현재 주소로 갱신했다. 변경 전에 두 주소의 대상인 main 커밋 a36ff68의 일치를 실제 확인했다. 2026-10-23 공개 업로드 완료: https://github.com/cheese-flavor/pokemon-research-lab . 공개 상태와 main 푸시를 확인했다. 최초 공개 커밋은 5eb9a2b이며 82개 허용 파일과 새 이력만 포함한다.
 
 공개 준비 확인: 허용 목록 82파일을 내보내 같은 실행 환경에서 테스트 63개를 실행했다. 로컬 데이터가 없어서 UI 7개는 건너뛰었고 나머지 56개는 통과했다. 새 Python 환경의 의존성 설치 검증과는 구분한다.
+
+후속 지시(2026-10-23): GitLab 최신화를 재허용했다. 위 중단 기록은 당시 상태이며, 현재는 GitLab 원본 이력과 GitHub 공개 허용 목록 이력을 각각 유지한다.

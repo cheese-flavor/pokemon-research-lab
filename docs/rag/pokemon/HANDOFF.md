@@ -14,7 +14,7 @@
 
 - 공개 GitHub: https://github.com/cheese-flavor/pokemon-research-lab
 - 로컬 프로젝트 루트: `C:\Users\SSAFY\Desktop\05-pjt`.
-- 원본 루트의 `origin`은 GitLab로 남아 있지만 **사용자 요청으로 모든 GitLab 푸시·재시도 중단**. GitHub만 갱신한다. 원격 이름을 보고 무조건 `git push origin` 하지 않는다.
+- 원본 루트의 `origin`은 GitLab다. 일시 중단 후 사용자가 2026-10-23 GitLab 최신화를 다시 허용했다. GitLab은 원본 루트, 공개 GitHub는 별도 허용 목록 복사본에서 갱신한다. 원격을 확인하고 일반 푸시한다.
 - GitHub는 과거 ML 이력이 없는 별도 공개 이력이다. 최초 공개 커밋은 `5eb9a2b`, 공개 확인 문서 커밋은 `5f24f79`였다. 후속 커밋은 실제 Git 로그에서 확인한다.
 - 현재 공개 저장소 작업 복사본은 ignored `outputs/pokemon/public-release-v2/`다. 그 복사본의 `origin`은 GitHub다. 다른 PC에서는 GitHub를 새로 clone한다.
 - PDF, 원본/점검 Excel, 데이터, 다운로드한 이미지, API 응답 캐시, 임베딩, 벡터 DB, `.env`와 비밀은 모든 원격에서 제외한다. 이미 추적된 파일에는 ignore가 소급되지 않으므로 매번 스테이징 목록을 검사한다.
@@ -108,6 +108,8 @@ streamlit_lab/.venv/Scripts/python.exe scripts/verify_pokemon_submission.py
 
 재개할 때 할 일은 먼저 Git 상태와 이 문서를 확인하고 앱을 재시작하는 것이다. 마지막 종별 프롬프트 문구 다듬기까지 회귀 70개는 통과했지만, 그 문구의 복수 종 브라우저 재촬영과 독립 사실 검수는 남아 있다. 기존 08번 캡처를 이 문구의 최종 검증으로 부르지 않는다. 핵심 기능 화면 13장과 셀프 점검 사본은 이미 저장했다.
 
-다음 채팅에 사용할 요청 예시: “docs/rag/pokemon/HANDOFF.md와 WORK_PLAN.md를 먼저 읽고 현재 상태를 확인해줘. GitLab은 건드리지 말고 GitHub만 사용해. 우선 미완료 점검을 설명한 뒤 내가 지정한 작업만 진행해줘.”
+다음 채팅에 사용할 요청 예시: “docs/rag/pokemon/HANDOFF.md와 WORK_PLAN.md를 먼저 읽고 현재 상태를 확인해줘. GitLab과 GitHub 원격 및 공개 제외 규칙을 확인해. 우선 미완료 점검을 설명한 뒤 내가 지정한 작업만 진행해줘.”
 
 이번 UI/전체 대화/준비 재사용 구현의 원본 로컬 커밋: `e0b020b`. 공개 GitHub 복사본의 커밋 해시는 별도 이력이므로 다를 수 있다.
+
+최신 지시: 사용자가 GitLab 최신화를 재허용했다. 이전 GitLab 중단 기록은 당시 상황이다. 제출 원문 21~23쪽 재확인 결과 별도 ZIP 제출 형식이 있으며 SUBMISSION.md 마지막 절에 정리했다. ZIP 생성·실제 제출은 아직 수행하지 않았다.
