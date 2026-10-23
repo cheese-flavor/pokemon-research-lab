@@ -36,7 +36,7 @@
 
 ## 빠른 시작
 
-Python 3.11 이상과 SSAFY GMS 사용 권한이 필요합니다. Windows PowerShell 기준이며 프로젝트 루트에서 실행합니다.
+Python 3.11 이상과 GMS 사용 권한이 필요합니다. Windows PowerShell 기준이며 프로젝트 루트에서 실행합니다.
 
 ```powershell
 git clone https://github.com/cheese-flavor/pokemon-research-lab.git
