@@ -22,6 +22,7 @@
 | 5 (완료) | LangGraph 검색·생성·근거 표시, F2006~F2008 | 두 노드, 메타 포함·중복·버전·Top-k, 실제 답변/인용, 8사례·오프라인 재현, `RAG_VALIDATION.md` | 필요 | `feat(rag): answer with merged and cited evidence` |
 | 6 (완료) | 화면·조건 탐색·특화 기능, F2009~F2012 | Streamlit 항목별 대화·근거 보존, 조건 4사례·카드·진행/오류 화면, 테스트 59개, `UI_VALIDATION.md` | 필요 | `feat(ui): add Pokemon chat and evidence-based exploration` |
 | 6a (완료) | 사용자 추가 요청: 포켓몬 테마 디자인 개편 | 1번 도감+2번 수채화 조합 적용, 실제 조건 탐색·1,025종 이미지·공개본 정리. `DESIGN.md` | 시안 생성은 GMS 불필요 | `docs: record Pokemon design directions` |
+| 6b (구현·자동 검증 완료, 재개 지점 저장) | 사용자 추가 요청: 아이콘 전체 도감·전체 대화·준비 문서 재사용·기능 캡처 | `GLOBAL_CHAT_VALIDATION.md`, `result/`, 인계 문서 | 기존 키 재사용 | `feat(ui): add global Pokemon conversation and icon catalogue` |
 | 7 (자동 점검·문서 완료, 제출 확인 잔여) | 필수 검증·제출 문서, NF2001~NF2007 | 요구사항별 실제 결과, 한계, 실행법, 셀프 점검; 상호 검증은 실제 참여 필요 | 필요 | `docs: record validation and project usage` |
 | 8 (선택) | F2013~F2016 중 사용자 선택 | 직접 UI/MMR/RAG 전후 비교/다른 종류의 출처 결합 중 선택한 결과 | 기능별 | `feat: add selected advanced requirement` |
 
@@ -59,3 +60,5 @@ LLM과 임베딩 모두 GMS에서 사용 가능한 모델·주소를 실제로 �
 - 최종 데이터 기술통계 EDA: 완료. 1,025종·64,264문서의 분포·결측·반복·상관관계를 집계했다. 원본 변경 및 외부 호출 없이 수행했고, 집계 보고서와 그래프만 Git에 반영한다. `EDA.md` 참고.
 - 요구사항 정의 및 RAG 설계: 완료. `REQUIREMENTS.md`, `RAG_DESIGN.md`에 필수/비기능 인수 기준·두 컬렉션·세 프롬프트·검색/청킹 설정·대표 질문을 정리했다. 설계이며 구현 통과를 뜻하지 않는다.
 - 작업 7: 요구사항 대조·10사례 캐시 성능·재실행·사용법·셀프 점검·빈 상호 검증 양식을 `SUBMISSION.md`에 정리했다. 실제 상호 검증·독립 사실 평가·최종 화면 묶음·최초 네트워크 성능·외부 검색 해석 확인이 남아 있다. 최종 제출 완료는 아니다. 선택 작업 8은 별도 사용자 선택 후 진행한다.
+
+2026-10-23 사용자 변경: GitLab 푸시는 중단하고 공개 허용 목록을 통해 GitHub만 갱신한다. 이번에는 사용자가 작업 6b와 체크리스트 점검을 함께 요청했다. 전체 대화 유지가 기존 항목별 대화 기준을 대체하지만 원본 평가 양식의 문구는 변경하지 않는다.
