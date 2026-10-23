@@ -4,6 +4,7 @@ import json
 from functools import lru_cache
 from html import escape
 from pathlib import Path
+from io import BytesIO
 
 ART = {25: 'pikachu-watercolor.png', 81: 'magnemite-watercolor.png'}
 TYPE_COLORS = {
@@ -20,10 +21,46 @@ def image_uri(path, modified):
     return 'data:image/png;base64,' + base64.b64encode(Path(path).read_bytes()).decode('ascii')
 
 
+@lru_cache(maxsize=4)
+def artwork_manifest(path, modified):
+    return json.loads(Path(path).read_text(encoding='utf-8'))
+
+
+@lru_cache(maxsize=1100)
+def thumbnail(path, modified, missing=False):
+    from PIL import Image, ImageEnhance, ImageDraw
+    with Image.open(path) as original:
+        image=original.convert('RGBA')
+        image.thumbnail((44,44))
+        if missing:
+            image=ImageEnhance.Color(image).enhance(0)
+            image=ImageEnhance.Brightness(image).enhance(.4)
+            ImageDraw.Draw(image).text((16,12),'?',fill='white')
+        buffer=BytesIO()
+        image.save(buffer,format='PNG',optimize=True)
+    return 'data:image/png;base64,'+base64.b64encode(buffer.getvalue()).decode('ascii')
+
+
+def catalogue_rows(root, items):
+    root=Path(root)
+    manifest=root/'dataset/pokemon/artwork/manifest.json'
+    entries=artwork_manifest(str(manifest),manifest.stat().st_mtime_ns).get('images',{}) if manifest.exists() else {}
+    result=[]
+    for item in items:
+        entry=entries.get(str(item['species_id']),{})
+        path=(root/entry.get('path','dataset/pokemon/artwork/absent.png')).resolve()
+        valid=(entry.get('status')=='available' and path.is_relative_to((root/'dataset/pokemon/artwork').resolve()) and path.is_file())
+        if not valid:
+            path=root/'streamlit_lab/assets/pokemon/pikachu-watercolor.png'
+        result.append({'아이콘':thumbnail(str(path),path.stat().st_mtime_ns,not valid),
+                       '포켓몬':f"#{item['species_id']:04d} {item['name_ko']}"})
+    return result
+
+
 def brand(root):
     path = Path(root) / 'streamlit_lab/assets/pokemon/pokeball.svg'
     uri = 'data:image/svg+xml;base64,' + base64.b64encode(path.read_bytes()).decode('ascii')
-    return f'<div class="pk-brand"><img src="{uri}" alt=""><div><strong>포켓몬 리서치 랩</strong><p>도감 속 이야기를 근거와 함께</p></div></div>'
+    return f'<div class="pk-brand"><img src="{uri}" alt=""><div><strong>Pokémon Research Lab</strong><p>포켓몬 정보 검색 · 도감 · 진화 조건</p></div></div>'
 
 
 def artwork(root, species_id):
@@ -34,7 +71,7 @@ def artwork(root, species_id):
         return image_uri(str(path), path.stat().st_mtime_ns), 'generated', ''
     manifest = root / 'dataset/pokemon/artwork/manifest.json'
     if manifest.exists():
-        entry = json.loads(manifest.read_text(encoding='utf-8')).get('images', {}).get(str(species_id), {})
+        entry = artwork_manifest(str(manifest),manifest.stat().st_mtime_ns).get('images', {}).get(str(species_id), {})
         candidate = (root / entry.get('path', 'dataset/pokemon/artwork/absent.png')).resolve()
         if (entry.get('status') == 'available'
                 and str(entry.get('source_url','')).startswith('https://raw.githubusercontent.com/PokeAPI/sprites/')
@@ -67,10 +104,10 @@ def profile(root, item, compact=False):
     image = art_markup(root, item['species_id'], item['name_ko'], hero=True)
     total = sum(item['stats'].values())
     return f'''<section class="pk-profile{' pk-profile-compact' if compact else ''}">
-<div class="pk-profile-copy"><p class="pk-eyebrow">POKÉMON RESEARCH LAB · 도감 속 이야기를 근거와 함께</p>
+<div class="pk-profile-copy"><p class="pk-eyebrow">POKÉMON RESEARCH LAB · NATIONAL POKÉDEX</p>
 <h1>#{item['species_id']:04d} {escape(item['name_ko'])}</h1>
 <p class="pk-english">{escape(item['name'])}</p><div class="pk-types">{badges(item['types'])}</div>
-<p class="pk-genus">{escape(item.get('genus_ko') or '포켓몬')}의 이야기를, 근거와 함께 살펴보세요.</p>
+<p class="pk-genus">{escape(item.get('genus_ko') or '포켓몬')} · 기본 형태 정보</p>
 <dl class="pk-measures"><div><dt>키</dt><dd>{item['height_m']:g}<small> m</small></dd></div>
 <div><dt>몸무게</dt><dd>{item['weight_kg']:g}<small> kg</small></dd></div>
 <div><dt>종족값 합계</dt><dd>{total}</dd></div></dl></div>

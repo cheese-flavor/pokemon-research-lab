@@ -10,6 +10,7 @@ from dotenv import dotenv_values
 from .store import read_collection
 
 STAGES={'search_queries':'질문에 맞는 검색어를 정리하고 있어요', 'source_search':'관련 자료를 찾고 있어요',
+        'documents_reused':'준비된 설명 자료를 재사용하고 있어요',
         'candidate_selection':'질문에 필요한 자료를 고르고 있어요','document_indexing':'설명 자료를 준비하고 있어요',
         'documents_ready':'설명 자료를 준비했어요','retrieve':'답변의 근거를 찾고 있어요','generate':'근거를 확인하며 답변하고 있어요',
         'conditions':'탐색 조건을 해석하고 있어요','condition_filter':'실제 속성과 조건을 대조하고 있어요'}

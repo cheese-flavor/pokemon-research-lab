@@ -15,6 +15,7 @@ from src.pokemon import ui_theme as theme
 from src.pokemon.explore import explore_items
 from src.pokemon.evolution import load_evolution_cards
 from src.pokemon.rag import answer_question
+from src.pokemon.conversation import answer_global
 
 st.set_page_config(page_title='포켓몬 리서치 랩',page_icon=str(ROOT/'streamlit_lab/assets/pokemon/pikachu-watercolor.png'),layout='wide')
 st.markdown('<style>'+(ROOT/'streamlit_lab/assets/pokemon.css').read_text(encoding='utf-8')+'</style>',unsafe_allow_html=True)
@@ -45,24 +46,32 @@ def open_exploration():
     st.session_state['run_exploration']=True
 
 
+@st.cache_data(show_spinner=False)
+def catalogue_rows(revision, artwork_modified, items_modified):
+    return theme.catalogue_rows(ROOT,items)
+
 with st.sidebar:
     st.markdown(theme.brand(ROOT),unsafe_allow_html=True)
-    st.subheader('함께 알아볼 포켓몬')
-    identity=st.selectbox('포켓몬 이름 또는 번호',list(by_id),key='selected_item',
-        format_func=lambda key:f"#{by_id[key]['species_id']:04d} {by_id[key]['name_ko']} · {by_id[key]['name']}")
-    st.caption('목록을 열어 한국어·영문 이름이나 번호로 찾아보세요.')
-    st.divider()
-    st.write('**지식 준비 현황**')
-    st.caption(f"포켓몬 {ready['metadata_count']:,}종 · 설명 {ready['document_count']:,}조각")
-    st.caption('설명 자료는 질문에 맞춰 추가로 준비합니다.')
-    st.button('이 포켓몬의 대화 지우기',on_click=clear_selected,width='stretch')
-    st.divider()
-    st.caption('기본 형태의 고정 자료를 사용합니다. 생성 번역과 게임별 범위는 근거에서 확인하세요.')
-    with st.expander('빠른 도감'):
-        for number in (25,1,2,3,4,5,6,7,8,9,81,133):
-            item=by_id.get(f'pokemon-species:{number}')
-            if item:
-                st.button(f"#{number:04d} {item['name_ko']}",key=f'nav_{number}',on_click=choose,args=(item['item_id'],),width='stretch')
+    search=st.text_input('도감 검색',placeholder='이름 또는 도감 번호',key='catalogue_search')
+    visible=[i for i in items if not search or search.casefold() in
+             f"{i['species_id']:04d} {i['name_ko']} {i['name']}".casefold()]
+    manifest=ROOT/'dataset/pokemon/artwork/manifest.json'
+    rows=catalogue_rows(items[0]['source_revision'],manifest.stat().st_mtime_ns if manifest.exists() else 0,
+                        (ROOT/config['metadata']['items_path']).stat().st_mtime_ns)
+    row_map={item['item_id']:row for item,row in zip(items,rows)}
+    def select_catalogue():
+        selection=st.session_state.catalogue.selection.rows
+        if selection:
+            choose(visible[selection[0]]['item_id'])
+    st.caption(f'전국도감 · {len(visible):,} / {len(items):,}종')
+    st.dataframe([row_map[i['item_id']] for i in visible],hide_index=True,height=570,
+                 column_config={'아이콘':st.column_config.ImageColumn(' ',width=55),
+                                '포켓몬':st.column_config.TextColumn('포켓몬',width='medium')},
+                 row_height=52,width='stretch',on_select=select_catalogue,
+                 selection_mode='single-row',key='catalogue')
+    st.caption('행을 선택하면 도감 정보가 바뀝니다. 대화는 전체 포켓몬에 대해 이어집니다.')
+
+identity=st.session_state.selected_item
 
 selected=by_id[identity]
 st.markdown(theme.profile(ROOT,selected,compact=st.session_state.get('view')=='조건 탐색'),unsafe_allow_html=True)
@@ -103,6 +112,8 @@ def render_message(message):
         if message.get('versions'):
             st.caption('요청 버전: '+', '.join(message['versions']))
         if message['role']=='assistant':
+            if 'elapsed_seconds' in message:
+                st.caption(f"처리 시간 {message['elapsed_seconds']:.2f}초")
             render_sources(message.get('sources',[]),message.get('citation_notice',''))
 
 def run_with_status(label,operation):
@@ -134,32 +145,38 @@ if view=='대화':
             st.button('조건으로 탐색하기',on_click=open_exploration,type='primary',width='stretch',disabled=not ready['ready'],icon=':material/search:')
             st.caption('조건 탐색에서 해석한 조건과 실제 일치 결과를 확인할 수 있습니다.')
     with conversation:
-        st.caption('도감·특성·진화 조건을 질문하고, 실제 사용한 원문을 확인하세요.')
+        st.caption('전체 포켓몬 대화 · 이름이나 도감 번호로 최대 3종을 질문하세요. 이전 질문도 이어서 물을 수 있습니다.')
+        st.button('전체 대화 지우기',on_click=lambda: st.session_state.update(global_messages=[],global_topics=[]))
         # Exact identifiers match the version fields in the source, avoiding guessed game mappings.
         import csv
         raw=ROOT/'dataset/pokemon/raw'/('bulk_'+selected['source_revision'])/'versions.csv'
         with raw.open(encoding='utf-8',newline='') as handle:
             versions=[r['identifier'] for r in csv.DictReader(handle)]
-        requested=st.multiselect('게임 버전 지정 (선택)',versions,key='versions_'+identity,
+        requested=st.multiselect('게임 버전 지정 (선택)',versions,key='global_versions',
                                 placeholder='버전을 선택하거나 비워두세요',
                                 help='지정한 버전의 자료가 없으면 다른 버전으로 대신 답하지 않습니다.')
-        history=service.history_for(st.session_state,identity)
+        history=st.session_state.setdefault('global_messages',[])
         for message in history:
             render_message(message)
         hint=st.empty()
         if not history:
-            hint.info(f"예: {selected['name_ko']}의 도감 설명을 알려줘")
+            hint.info('예: 파이리의 도감 설명을 알려줘 · #1025의 특성은 뭐야?')
         live_reply=st.container()
-        question=st.chat_input('이 포켓몬에 대해 궁금한 점을 물어보세요',disabled=not ready['ready'])
+        question=st.chat_input('어떤 포켓몬이든 질문해 보세요',disabled=not ready['ready'])
         if question:
             hint.empty()
             with live_reply:
                 render_message({'role':'user','content':question,'versions':requested})
-                result=run_with_status('질문에 맞는 자료를 준비하고 있어요',lambda progress:answer_question(
-                    ROOT,config,identity,question,versions=requested or None,progress=progress))
+                result=run_with_status('질문에 맞는 자료를 준비하고 있어요',lambda progress:answer_global(
+                    ROOT,config,items,question,topic_ids=st.session_state.get('global_topics'),versions=requested or None,
+                    previous_question=next((m['content'] for m in reversed(history) if m['role']=='user'),None),progress=progress))
                 if result:
-                    service.save_reply(st.session_state,identity,question,result,requested)
-                    render_message(service.history_for(st.session_state,identity)[-1])
+                    st.session_state.global_topics=result['topic_ids']
+                    history.extend([{'role':'user','content':question,'versions':requested},
+                                    {'role':'assistant','content':result['answer'],'sources':result['sources'],
+                                     'citation_notice':result['citation_notice'],'versions':requested,
+                                     'elapsed_seconds':result['timings']['total_seconds']}])
+                    render_message(history[-1])
 elif view=='조건 탐색':
     st.write('#### 원하는 조건으로 찾아보기')
     st.caption('세대·타입·키·몸무게·능력치·전설/환상 여부처럼 확인 가능한 조건을 입력해 주세요.')
@@ -190,7 +207,7 @@ elif view=='조건 탐색':
             if len(result['items'])>12:
                 st.caption('상위 12종을 표시했습니다. 조건을 추가하면 결과를 좁힐 수 있습니다.')
 else:
-    st.write('#### 진화 조건을 출처와 함께')
+    st.write('#### 진화 조건')
     st.caption('검색된 조건의 일부를 보여줍니다. 한 행 안은 모두 충족(AND), 다른 행은 대안(OR)입니다.')
     if st.button('진화 조건 살펴보기',type='primary',disabled=not ready['ready']):
         st.session_state.setdefault('evolution_results',{}).pop(identity,None)

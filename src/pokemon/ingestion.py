@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import time
+import re
 
 from .chunking import CHUNKER_VERSION, chunks_for
 from .data import fingerprint
@@ -47,7 +48,7 @@ def validate_selection(result, candidates, limit):
             raise ValueError('Inconsistent candidate decision')
 
 
-def prepare_documents(root, config, item_name, question, offline=False, progress=None):
+def prepare_documents(root, config, item_name, question, offline=False, progress=None, reuse_prepared=False):
     root = Path(root)
     cfg, gms = config['documents'], config['gms']
     if not isinstance(question, str) or not question.strip() or len(question) > 4000:
@@ -59,6 +60,31 @@ def prepare_documents(root, config, item_name, question, offline=False, progress
     with indexing_lock(root/'dataset/pokemon/ingestion/write.lock'):
         source = SourceCatalogue(root, root/cfg['corpus_path'], cache/'search', offline)
         item = source.resolve(item_name)
+        # Reuse only fully indexed own documents of this exact corpus/chunk/model generation.
+        # Version expressions and unfamiliar domains retain the original two-prompt planner.
+        simple=bool(re.search(r'도감|설명|진화|특성|타입|몸무게|종족값|키가|키는',question))
+        versioned=bool(re.search(r'버전|게임|레드|블루|옐로|골드|실버|루비|사파이어|에메랄드|다이아|펄|플래티넘|블랙|화이트|썬|울트라문|썬문|소드|실드|스칼렛|바이올렛|레전드',question,re.I))
+        versioned=versioned or any(re.search(r'(?<![a-z0-9-])'+re.escape(v)+r'(?![a-z0-9-])',question,re.I) for v in source.versions)
+        if reuse_prepared and simple and not versioned:
+            signature=fingerprint([source.signature,cfg['schema_version'],CHUNKER_VERSION,cfg['chunk_size_chars'],
+                                   cfg['chunk_overlap_chars'],gms['embedding_model'],gms['embedding_dimensions']])
+            path=root/cfg['manifest_path']
+            path=path.with_name(path.stem+'_'+signature[:12]+'.json')
+            if path.exists():
+                manifest=json.loads(path.read_text(encoding='utf-8'))
+                saved=manifest.get('items',{}).get(item['item_id'],{})
+                own_ids={d['doc_id'] for d in source.own(item['item_id'])}
+                if (manifest.get('signature')==signature and own_ids==set(saved.get('own_doc_ids',[]))):
+                    collection=open_collection(root/config['metadata']['store_path'],manifest['collection'],signature)
+                    rows=collection.get(where={'item_id':item['item_id']},include=['metadatas'])
+                    if own_ids <= {m['doc_id'] for m in rows['metadatas']} and set(saved['chunk_ids'])<=set(rows['ids']):
+                        write_json(root/'dataset/pokemon/ingestion/active.json',
+                                   {'collection':manifest['collection'],'signature':signature,'manifest':str(path.relative_to(root))})
+                        if progress:
+                            progress('documents_reused')
+                        return {'reused_prepared':True,'unsupported':[],'requested_version':None,
+                                'self_documents_complete':True,'llm_calls':0,'embedding_calls':0,
+                                'elapsed_seconds':round(time.monotonic()-started,3)}
         llm = GmsJson(gms, cache/'llm', root/'streamlit_lab/.env', offline)
         if progress:
             progress('search_queries')

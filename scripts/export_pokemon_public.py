@@ -11,7 +11,7 @@ FIXED = ['README.md', '.gitignore', '.env.example', '.streamlit/config.toml', 'd
          'config/pokemon_rag.toml', 'src/__init__.py', 'scripts/__init__.py', 'streamlit_lab/app.py',
          'streamlit_lab/assets/pokemon.css', 'streamlit_lab/assets/pokemon/pokeball.svg',
          'streamlit_lab/assets/pokemon/TABLER-LICENSE.txt']
-PATTERNS = ['src/pokemon/*.py', 'scripts/*pokemon*.py', 'tests/test_pokemon*.py',
+PATTERNS = ['result/*.png', 'result/*.md', 'src/pokemon/*.py', 'scripts/*pokemon*.py', 'tests/test_pokemon*.py',
             'docs/rag/pokemon/**/*.md', 'docs/rag/pokemon/assets/*', 'docs/rag/pokemon/eda_figures/*.png',
             'streamlit_lab/assets/pokemon/pikachu-watercolor.png',
             'streamlit_lab/assets/pokemon/magnemite-watercolor.png']

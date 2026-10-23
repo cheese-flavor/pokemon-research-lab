@@ -7,7 +7,7 @@
 [data-testid="stSidebar"]>div:first-child { padding-top:0; }
 .pk-brand { display:flex; align-items:center; gap:10px; background:var(--pk-red); color:#fff; padding:30px 20px; margin:-1rem -1rem 1.5rem; }
 .pk-brand>img { width:34px; height:34px; filter:invert(1); }
-.pk-brand strong { display:block; font-size:21px; letter-spacing:-1px; line-height:1.4; }
+.pk-brand strong { display:block; font-size:19px; letter-spacing:-.5px; line-height:1.4; }
 .pk-brand p { margin:5px 0 0; color:#fff5f0; font-size:13px; }
 [data-testid="stSidebar"] h3 { font-size:17px; }
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color:#5c6471; }

@@ -60,7 +60,7 @@ def answer_question(root, config, item, question, versions=None, kinds=None, off
     block_reason=''
     if prepare and not unsupported:
         try:
-            preparation=prepare_documents(root,config,item,question,offline,progress)
+            preparation=prepare_documents(root,config,item,question,offline,progress,reuse_prepared=True)
             unsupported=preparation['unsupported']
         except ItemChangeRequired:
             block_reason='selected item differs from requested item'
@@ -82,6 +82,7 @@ def answer_question(root, config, item, question, versions=None, kinds=None, off
     result['diagnostics'].update(answer_calls=llm.calls,answer_cache_hits=llm.hits,answer_tokens=llm.tokens,
                                  preparation_llm_calls=preparation.get('llm_calls',0),
                                  preparation_embedding_calls=preparation.get('embedding_calls',0))
+    result['diagnostics']['reused_prepared']=preparation.get('reused_prepared',False)
     key=fingerprint([state,config['retrieval'],result['evidence']])
     write_json(root/'outputs/pokemon/rag/answers'/(key+'.json'),result)
     write_json(root/'outputs/pokemon/rag/graph.json',graph.get_graph().to_json())

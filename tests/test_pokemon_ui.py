@@ -90,21 +90,23 @@ class StreamlitContracts(unittest.TestCase):
         from streamlit.testing.v1 import AppTest
         return AppTest.from_file(str(ROOT/'streamlit_lab/app.py'),default_timeout=60)
 
-    def test_real_cached_chat_keeps_sources_when_switching_items_and_reports_progress(self):
+    def test_global_chat_keeps_sources_when_browsing_items_and_reports_progress(self):
         at=self.app().run()
         self.assertFalse(at.exception)
         at.chat_input[0].set_value('피카츄가 라이츄로 진화하는 조건을 찾아줘').run(timeout=60)
         self.assertFalse(at.exception)
-        self.assertEqual(len(at.session_state['chat_histories']['pokemon-species:25']),2)
+        self.assertEqual(len(at.session_state['global_messages']),2)
         self.assertTrue(any('thunder-stone' in m.value for m in at.markdown))
         self.assertTrue(any(service.STAGES['generate'] in m.value for m in at.markdown))
-        at.selectbox(key='selected_item').set_value('pokemon-species:133').run()
-        self.assertEqual(len(at.chat_message),0)
-        at.selectbox(key='selected_item').set_value('pokemon-species:25').run()
+        at.session_state['selected_item']='pokemon-species:133'
+        at.run()
+        self.assertEqual(len(at.chat_message),2)
+        at.session_state['selected_item']='pokemon-species:25'
+        at.run()
         self.assertEqual(len(at.chat_message),2)
         self.assertTrue(any('답변에 사용한 근거' in e.label for e in at.expander))
-        next(b for b in at.button if b.label=='이 포켓몬의 대화 지우기').click().run()
-        self.assertEqual(at.session_state['chat_histories']['pokemon-species:25'],[])
+        next(b for b in at.button if b.label=='전체 대화 지우기').click().run()
+        self.assertEqual(at.session_state['global_messages'],[])
 
     def test_missing_key_is_shown_without_exposing_key(self):
         with patch.dict(os.environ,{'GMS_KEY':''}),patch('src.pokemon.ui_service.dotenv_values',return_value={}):
@@ -133,7 +135,7 @@ class StreamlitContracts(unittest.TestCase):
         self.assertEqual(at.session_state['view'],'대화')
         with patch('src.pokemon.rag.answer_question',side_effect=RuntimeError('PRIVATE_SENTINEL')):
             # app imports the function each rerun, so the backend failure is reached by the real UI.
-            at.chat_input[0].set_value('테스트 질문').run()
+            at.chat_input[0].set_value('피카츄 테스트 질문').run()
             self.assertFalse(at.exception)
             self.assertTrue(at.error)
             self.assertTrue(all('PRIVATE_SENTINEL' not in e.value for e in at.error))
@@ -169,7 +171,7 @@ class StreamlitContracts(unittest.TestCase):
         self.assertFalse(at.exception)
         result=at.session_state['evolution_results']['pokemon-species:25']
         self.assertEqual(len(result['cards']),3)
-        self.assertEqual(len(at.dataframe),3)
+        self.assertEqual(len(at.dataframe),4)
         self.assertTrue(any('조건 원문' in m.value and '[근거 ' in m.value for m in at.markdown))
 
 
