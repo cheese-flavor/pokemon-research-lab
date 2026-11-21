@@ -1,5 +1,11 @@
 # 포켓몬 리서치 랩
 
+> **프로젝트 통합 안내 · 2026-11-21**
+> 이 저장소는 **AI 코어 2회차 RAG·Streamlit 공개 보존본**입니다. RAG 소스·이미지·문서와 원본 Git 커밋 이력을 3회차 카드 리서치·AI Agent 프로젝트에 `rag/` 디렉터리로 통합했습니다.
+> - [통합 프로젝트 README](https://github.com/cheese-flavor/1631825-03-ai-pjt/blob/master/README.md) · [RAG 통합 경로](https://github.com/cheese-flavor/1631825-03-ai-pjt/tree/master/rag) · [통합 및 검증 기록](https://github.com/cheese-flavor/1631825-03-ai-pjt/blob/master/docs/INTEGRATION.md)
+> - **접근 안내:** 통합 저장소는 현재 Private이므로 권한이 없는 방문자에게는 위 링크가 열리지 않습니다. 이 공개 저장소의 기존 RAG 코드·실행 안내는 계속 유지됩니다.
+> - 통합 저장소의 최신 FastAPI 앱과 RAG Streamlit 앱은 아직 별도로 실행하며, 공개 운영 URL은 별도 확인이 필요합니다.
+
 > 포켓몬을 찾고, 질문하고, 원문 출처로 확인하는 백과형 RAG 웹 앱
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
